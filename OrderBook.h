@@ -9,8 +9,8 @@
  * the order will return an array of trade IDs for the trades that were executed,
  * or NULL if no trades occurred.
  *
- * Author: Your Name
- * Date: January 2025
+ * Author: Adam Rubinstein
+ * Date: January 19, 2025
  */
 
 #ifndef ORDER_BOOK_H

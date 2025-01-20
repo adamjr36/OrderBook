@@ -9,8 +9,8 @@
  * trades are executed automatically. The function that adds the order returns an
  * array of trade IDs for any executed trades, or NULL if no trades occurred.
  *
- * Author: Your Name
- * Date: January 2025
+ * Author: Adam Rubinstein
+ * Date: January 19, 2025
  */
 
 #include "OrderBook.h"
