@@ -20,4 +20,4 @@ There were a lot of memory leaks and the testing file did a great job of making 
 
 ## Outstanding Issues
 
-Not enough as much error handling as a real production application. Good enough for what it is with minimal prompting and asking for test files to be "rigorous."
+Not as much error handling as a real production application. Good enough for what it is with minimal prompting and asking for test files to be "rigorous."
