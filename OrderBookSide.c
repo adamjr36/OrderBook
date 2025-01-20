@@ -9,6 +9,7 @@
  * Author: Adam Rubinstein
  * Date: January 2025
  */
+#include "stdio.h"
 
 #include "OrderBookSide.h"
 #include "HashTable.h"
@@ -37,7 +38,7 @@ OrderBookSide OrderBookSide_create(int is_buy_side) {
     }
     side->order_lookup = HashTable_create(1024); // Added default capacity
     if (!side->order_lookup) {
-        OrderedMap_destroy(side->levels);
+        OrderedMap_destroy(&(side->levels));
         free(side);
         return NULL;
     }
@@ -45,12 +46,27 @@ OrderBookSide OrderBookSide_create(int is_buy_side) {
     return side;
 }
 
-void OrderBookSide_destroy(OrderBookSide side) {
-    if (!side) return;
+void OrderBookSide_destroy(OrderBookSide *side) {
+    if (!side || !*side) return;
+    OrderBookSide s = *side;
 
-    OrderedMap_destroy(side->levels);
-    HashTable_destroy(side->order_lookup);
-    free(side);
+    OrderedMapIterator iter = OrderedMap_front(s->levels);
+    char reached_end = 0;
+    while (!reached_end) {
+        double price;
+        OrderBookLevel level;
+        OrderedMapIterator_get(iter, &price, (void **)&level);
+        
+        if (level) OrderBookLevel_destroy(&level);
+        reached_end = !OrderedMapIterator_next(iter);
+    }
+
+    OrderedMapIterator_destroy(&iter);
+    OrderedMap_destroy(&(s->levels));
+    HashTable_destroy(&(s->order_lookup));
+    free(s);
+
+    *side = NULL;
 }
 
 int OrderBookSide_add_order(OrderBookSide side, const Order order) {
@@ -121,8 +137,10 @@ int OrderBookSide_execute_against(OrderBookSide side, Order order, Order **fille
                 OrderBookLevel_remove_order(level, filled_order);
             // Otherwise, update the filled order's quantity
             } else {
-                other->quantity = filled_quantity;
+                other->quantity -= filled_quantity;
+                OrderBookLevel_reset_total_quantity(level);
                 memcpy(filled_order, other, sizeof(struct Order));
+                filled_order->quantity = filled_quantity;
             }
 
             *filled_orders = realloc(*filled_orders, (*filled_count + 1) * sizeof(Order)); // vec?
@@ -132,7 +150,7 @@ int OrderBookSide_execute_against(OrderBookSide side, Order order, Order **fille
 
         if (OrderBookLevel_is_empty(level)) {
             OrderedMap_remove(side->levels, price);
-            OrderBookLevel_destroy(level);
+            OrderBookLevel_destroy(&level);
         }
     }
 
@@ -150,6 +168,41 @@ double OrderBookSide_get_best_price(OrderBookSide side) {
     }
 
     return best_price;
+}
+
+int OrderBookSide_get_levels(OrderBookSide side, int k, struct OrderBookLevelView **levels, int *level_count) {
+    if (!side || !levels || !level_count) return 0;
+
+    *levels = NULL;
+    *level_count = k;
+
+    if (k == 0) {
+        *level_count = OrderedMap_size(side->levels);
+    }
+    *levels = malloc(*level_count * sizeof(struct OrderBookLevelView));
+    if (!*levels) return 0;
+
+    double price;
+    OrderBookLevel level;
+    int i = 0;
+
+    OrderedMapIterator iter = side->is_buy_side ? OrderedMap_back(side->levels) : OrderedMap_front(side->levels);
+    //function pointer to OrderedMapIterator_prev if buy side, OrderedMapIterator_next if sell side
+    int (*iterate)(OrderedMapIterator) = side->is_buy_side ? OrderedMapIterator_prev : OrderedMapIterator_next;
+
+
+    while (i < *level_count) {
+        if (!OrderedMapIterator_get(iter, &price, (void **)&level)) break;
+
+        (*levels)[i].price = price;
+        (*levels)[i].size = OrderBookLevel_get_total_quantity(level);
+
+        iterate(iter);
+        i++;
+    }
+    OrderedMapIterator_destroy(&iter);
+
+    return 1;
 }
 
 // Helper function implementations

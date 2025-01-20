@@ -16,7 +16,7 @@ void test_create_destroy() {
         printf("Failed to create hash table.\n");
         exit(EXIT_FAILURE);
     }
-    HashTable_destroy(table);
+    HashTable_destroy(&table);
     printf("Passed.\n\n");
 }
 
@@ -41,7 +41,7 @@ void test_add_get() {
     value = HashTable_get(table, "nonexistent");
     printf("Expected: (null), Got: %s\n\n", value);
 
-    HashTable_destroy(table);
+    HashTable_destroy(&table);
 }
 
 void test_remove() {
@@ -66,7 +66,7 @@ void test_remove() {
     HashTable_remove(table, "key2");
     printf("Expected: (null), Got: %s\n\n", (char *)HashTable_get(table, "key2"));
 
-    HashTable_destroy(table);
+    HashTable_destroy(&table);
 }
 
 void test_resize() {
@@ -94,7 +94,7 @@ void test_resize() {
     }
 
     printf("Resize test passed.\n\n");
-    HashTable_destroy(table);
+    HashTable_destroy(&table);
 }
 
 int main() {

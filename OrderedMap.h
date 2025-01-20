@@ -16,7 +16,7 @@
 // Type definitions
 typedef struct OrderedMap *OrderedMap;
 
-// Function contracts
+typedef struct OrderedMapIterator *OrderedMapIterator;
 
 /**
  * Creates a new OrderedMap instance.
@@ -28,9 +28,9 @@ OrderedMap OrderedMap_create();
 /**
  * Destroys an OrderedMap instance, freeing all associated memory.
  *
- * @param map The OrderedMap instance to destroy.
+ * @param map A pointer to the OrderedMap instance to destroy.
  */
-void OrderedMap_destroy(OrderedMap map);
+void OrderedMap_destroy(OrderedMap *map);
 
 /**
  * Inserts a key-value pair into the map. If the key already exists, updates its value.
@@ -88,5 +88,54 @@ int OrderedMap_get_max(const OrderedMap map, double *key, void **value);
  * @return The number of key-value pairs in the map.
  */
 size_t OrderedMap_size(const OrderedMap map);
+
+/**
+ * Creates a new iterator for the map, starting at the first key-value pair.
+ *
+ * @param map The OrderedMap instance.
+ * @return A newly allocated OrderedMapIterator instance, or NULL on failure.
+ */
+OrderedMapIterator OrderedMap_front(OrderedMap map);
+
+/**
+ * Creates a new iterator for the map, starting at the last key-value pair.
+ *
+ * @param map The OrderedMap instance.
+ * @return A newly allocated OrderedMapIterator instance, or NULL on failure.
+ */
+OrderedMapIterator OrderedMap_back(OrderedMap map);
+
+/**
+ * Destroys an OrderedMapIterator instance, freeing all associated memory.
+ *
+ * @param iter A pointer to the OrderedMapIterator instance to destroy.
+ */
+void OrderedMapIterator_destroy(OrderedMapIterator *iter);
+
+/**
+ * Retrieves the key-value pair at the current iterator position.
+ *
+ * @param iter The OrderedMapIterator instance.
+ * @param key Output pointer to store the key.
+ * @param value Output pointer to store the value.
+ * @return 1 if the iterator is valid, 0 if the end of the map is reached.
+ */
+int OrderedMapIterator_get(OrderedMapIterator iter, double *key, void **value);
+
+/**
+ * Advances the iterator to the next key-value pair in the map.
+ *
+ * @param iter The OrderedMapIterator instance.
+ * @return 1 if the iterator was successfully advanced, 0 if the end of the map is reached.
+ */
+int OrderedMapIterator_next(OrderedMapIterator iter);
+
+/**
+ * Advances the iterator to the previous key-value pair in the map.
+ *
+ * @param iter The OrderedMapIterator instance.
+ * @return 1 if the iterator was successfully advanced, 0 if the beginning of the map is reached.
+ */
+int OrderedMapIterator_prev(OrderedMapIterator iter);
 
 #endif // ORDERED_MAP_H

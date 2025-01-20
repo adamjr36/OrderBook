@@ -13,7 +13,8 @@ TARGET_MAP = TestOrderedMap
 TARGET_LEVEL = TestOrderBookLevel
 TARGET_HASH = TestHashTable
 TARGET_SIDE = TestOrderBookSide
-TARGETS = $(TARGET_MAP) $(TARGET_LEVEL) $(TARGET_HASH) $(TARGET_SIDE)
+TARGET_BOOK = TestOrderBook
+TARGETS = $(TARGET_MAP) $(TARGET_LEVEL) $(TARGET_HASH) $(TARGET_SIDE) $(TARGET_BOOK)
 
 # Default rule
 # all: $(TARGET)
@@ -21,6 +22,7 @@ test_map: $(TARGET_MAP)
 test_obl: $(TARGET_LEVEL)
 test_hash: $(TARGET_HASH)
 test_side: $(TARGET_SIDE)
+test_book: $(TARGET_BOOK)
 
 # $(TARGET): $(OBJ)
 # 	$(CC) $(CFLAGS) -o $@ $^
@@ -35,6 +37,9 @@ $(TARGET_HASH): TestHashTable.o HashTable.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(TARGET_SIDE): TestOrderBookSide.o OrderBookSide.o OrderBookLevel.o OrderedMap.o HashTable.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(TARGET_BOOK): TestOrderBook.o OrderBook.o OrderBookSide.o OrderBookLevel.o OrderedMap.o HashTable.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: %.c

@@ -29,9 +29,9 @@ HashTable HashTable_create(size_t capacity);
  * ----------------------------
  * Frees all memory associated with the hash table.
  *
- * @param table: Hash table to be destroyed.
+ * @param table: A pointer to the Hash table to be destroyed.
  */
-void HashTable_destroy(HashTable table);
+void HashTable_destroy(HashTable *table);
 
 /*
  * Function: HashTable_add

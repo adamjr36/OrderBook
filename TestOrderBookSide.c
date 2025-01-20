@@ -74,6 +74,20 @@ int main() {
         printf("Test get_order_by_id: FAILED\nExpected: order found\nActual: order not found\n");
     }
 
+    // Test get_levels
+    printf("Retrieving levels...\n");
+    struct OrderBookLevelView *levels = NULL;
+    int level_count = 0;
+    if (OrderBookSide_get_levels(sell_side, 0, &levels, &level_count)) {
+        printf("Levels:\n");
+        for (int i = 0; i < level_count; ++i) {
+            printf("Price: %.2f, Size: %d\n", levels[i].price, levels[i].size);
+        }
+        free(levels);
+    } else {
+        printf("Test get_levels: FAILED\nExpected: successful retrieval\nActual: retrieval failed\n");
+    }
+
     // Test delete_order_by_id
     printf("Deleting order by ID: order1\n");
     int delete_result = OrderBookSide_delete_order_by_id(sell_side, "order1");
@@ -88,6 +102,7 @@ int main() {
         printf("Filled orders:\n");
         for (int i = 0; i < filled_count; ++i) {
             print_order(filled_orders[i]);
+            free(filled_orders[i]);
         }
         free(filled_orders);
     } else {
@@ -98,8 +113,20 @@ int main() {
     best_price = OrderBookSide_get_best_price(sell_side);
     log_test_result("Test best_price_after_execution", best_price == 105.0, "105.0", best_price);
 
+    // Test get_levels after execution
+    printf("Retrieving levels after execution...\n");
+    if (OrderBookSide_get_levels(sell_side, 0, &levels, &level_count)) {
+        printf("Levels:\n");
+        for (int i = 0; i < level_count; ++i) {
+            printf("Price: %.2f, Size: %d\n", levels[i].price, levels[i].size);
+        }
+        free(levels);
+    } else {
+        printf("Test get_levels_after_execution: FAILED\nExpected: successful retrieval\nActual: retrieval failed\n");
+    }
+
     // Cleanup
-    OrderBookSide_destroy(sell_side);
+    OrderBookSide_destroy(&sell_side);
     printf("Testing completed\n");
 
     return 0;

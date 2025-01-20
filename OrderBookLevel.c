@@ -41,15 +41,17 @@ OrderBookLevel OrderBookLevel_create(double price) {
     return level;
 }
 
-void OrderBookLevel_destroy(OrderBookLevel level) {
-    if (!level) return;
-    OrderNode current = level->head;
+void OrderBookLevel_destroy(OrderBookLevel *level) {
+    if (!level || !*level) return;
+    OrderBookLevel l = *level;
+    OrderNode current = l->head;
     while (current) {
         OrderNode next = current->next;
         destroy_order_node(current);
         current = next;
     }
-    free(level);
+    free(l);
+    *level = NULL;
 }
 
 int OrderBookLevel_add_order(OrderBookLevel level, const Order order) {
@@ -138,6 +140,18 @@ int OrderBookLevel_delete_order_by_id(OrderBookLevel level, const char *order_id
 int OrderBookLevel_get_total_quantity(const OrderBookLevel level) {
     return level ? level->total_quantity : 0;
 }
+
+void OrderBookLevel_reset_total_quantity(OrderBookLevel level) {
+    if (level) {
+        level->total_quantity = 0;
+        OrderNode current = level->head;
+        while (current) {
+            level->total_quantity += current->order.quantity;
+            current = current->next;
+        }
+    }
+}
+
 
 bool OrderBookLevel_is_empty(const OrderBookLevel level) {
     return level ? level->head == NULL : true;

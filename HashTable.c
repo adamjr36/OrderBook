@@ -76,11 +76,12 @@ HashTable HashTable_create(size_t capacity) {
     return table;
 }
 
-void HashTable_destroy(HashTable table) {
-    if (!table) return;
+void HashTable_destroy(HashTable *table) {
+    if (!table || !*table) return;
+    HashTable t = *table;
 
-    for (size_t i = 0; i < table->capacity; ++i) {
-        HashNode node = table->buckets[i];
+    for (size_t i = 0; i < t->capacity; ++i) {
+        HashNode node = t->buckets[i];
         while (node) {
             HashNode next = node->next;
             free(node->key);
@@ -89,8 +90,10 @@ void HashTable_destroy(HashTable table) {
         }
     }
 
-    free(table->buckets);
-    free(table);
+    free(t->buckets);
+    free(t);
+
+    *table = NULL;
 }
 
 int HashTable_add(HashTable table, const char *key, void *value) {

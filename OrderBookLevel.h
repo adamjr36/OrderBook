@@ -36,9 +36,9 @@ OrderBookLevel OrderBookLevel_create(double price);
 /**
  * Destroys an OrderBookLevel instance, freeing all associated memory.
  *
- * @param level The OrderBookLevel instance to destroy.
+ * @param level A pointer to the OrderBookLevel instance to destroy.
  */
-void OrderBookLevel_destroy(OrderBookLevel level);
+void OrderBookLevel_destroy(OrderBookLevel *level);
 
 /**
  * Adds an order to the level.
@@ -93,6 +93,13 @@ int OrderBookLevel_delete_order_by_id(OrderBookLevel level, const char *order_id
  * @return The total quantity of orders at this price level.
  */
 int OrderBookLevel_get_total_quantity(const OrderBookLevel level);
+
+/**
+ * Recalculates the total quantity of the level.
+ *
+ * @param level The OrderBookLevel instance.
+ */
+void OrderBookLevel_reset_total_quantity(OrderBookLevel level);
 
 /**
  * Checks if the level is empty.

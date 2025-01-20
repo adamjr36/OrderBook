@@ -26,6 +26,11 @@ struct OrderedMap {
     size_t size;
 };
 
+struct OrderedMapIterator {
+    OrderedMap map;
+    AVLNode current;
+};
+
 // Helper function prototypes
 static AVLNode create_node(double key, void *value);
 static void destroy_node(AVLNode node);
@@ -38,6 +43,7 @@ static AVLNode rotate_right(AVLNode y);
 static AVLNode rotate_left(AVLNode x);
 
 // Public function implementations
+// Takes a function to free values, or NULL
 OrderedMap OrderedMap_create() {
     OrderedMap map = malloc(sizeof(struct OrderedMap));
     if (!map) return NULL;
@@ -46,10 +52,14 @@ OrderedMap OrderedMap_create() {
     return map;
 }
 
-void OrderedMap_destroy(OrderedMap map) {
-    if (!map) return;
-    destroy_node(map->root);
-    free(map);
+void OrderedMap_destroy(OrderedMap *map) {
+    if (!map || !*map) return;
+    OrderedMap m = *map;
+
+    destroy_node(m->root);
+    free(m);
+
+    *map = NULL;
 }
 
 int OrderedMap_insert(OrderedMap map, double key, void *value) {
@@ -100,6 +110,89 @@ int OrderedMap_get_max(const OrderedMap map, double *key, void **value) {
 
 size_t OrderedMap_size(const OrderedMap map) {
     return map ? map->size : 0;
+}
+
+OrderedMapIterator OrderedMap_front(OrderedMap map) {
+    if (!map) return NULL;
+    OrderedMapIterator iter = malloc(sizeof(struct OrderedMapIterator));
+    if (!iter) return NULL;
+    iter->map = map;
+    iter->current = map->root;
+    while (iter->current && iter->current->left) iter->current = iter->current->left;
+    return iter;
+}
+
+OrderedMapIterator OrderedMap_back(OrderedMap map) {
+    if (!map) return NULL;
+    OrderedMapIterator iter = malloc(sizeof(struct OrderedMapIterator));
+    if (!iter) return NULL;
+    iter->map = map;
+    iter->current = map->root;
+    while (iter->current && iter->current->right) iter->current = iter->current->right;
+    return iter;
+}
+
+void OrderedMapIterator_destroy(OrderedMapIterator *iter) {
+    if (!iter || !*iter) return;
+    free(*iter);
+    *iter = NULL;
+}
+
+int OrderedMapIterator_get(OrderedMapIterator iter, double *key, void **value) {
+    if (value) *value = NULL;
+    if (!iter || !iter->current) return 0;
+    if (key) *key = iter->current->key;
+    if (value) *value = iter->current->value;
+    return 1;
+}
+
+// Returns 0 if the iterator is at the end of the map
+int OrderedMapIterator_next(OrderedMapIterator iter) {
+    if (!iter || !iter->current) return 0;
+    if (iter->current->right) {
+        iter->current = find_min(iter->current->right);
+    } else {
+        AVLNode parent = NULL;
+        AVLNode temp = iter->map->root;
+        // First ancestor of current node whose left child is also ancestor of current node
+        while (temp) {
+            if (iter->current->key < temp->key) {
+                parent = temp;
+                temp = temp->left;
+            } else if (iter->current->key > temp->key) {
+                temp = temp->right;
+            } else {
+                break;
+            }
+        }
+        iter->current = parent;
+    }
+
+    return iter->current ? 1 : 0;
+}
+
+int OrderedMapIterator_prev(OrderedMapIterator iter) {
+    if (!iter || !iter->current) return 0;
+    if (iter->current->left) { //Max of left subtree
+        iter->current = iter->current->left;
+        while (iter->current->right) iter->current = iter->current->right;
+    } else {
+        AVLNode parent = NULL;
+        AVLNode temp = iter->map->root;
+        while (temp) {
+            if (iter->current->key > temp->key) {
+                parent = temp;
+                temp = temp->right;
+            } else if (iter->current->key < temp->key) {
+                temp = temp->left;
+            } else {
+                break;
+            }
+        }
+        iter->current = parent;
+    }
+
+    return iter->current ? 1 : 0;
 }
 
 // Helper function implementations

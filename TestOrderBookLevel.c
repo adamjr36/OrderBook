@@ -39,13 +39,13 @@ int main() {
     // Test 3: Remove orders
     struct Order ro = {0};
     Order removed_order = &ro;
-    print_test_result("Remove 1st order", OrderBookLevel_remove_order(level, &removed_order) && strcmp(removed_order->order_id, "order1") == 0);
+    print_test_result("Remove 1st order", OrderBookLevel_remove_order(level, removed_order) && strcmp(removed_order->order_id, "order1") == 0);
     print_test_result("Total quantity after 1st removal", OrderBookLevel_get_total_quantity(level) == 50);
 
-    print_test_result("Remove 2nd order", OrderBookLevel_remove_order(level, &removed_order) && strcmp(removed_order->order_id, "order2") == 0);
+    print_test_result("Remove 2nd order", OrderBookLevel_remove_order(level, removed_order) && strcmp(removed_order->order_id, "order2") == 0);
     print_test_result("Total quantity after 2nd removal", OrderBookLevel_get_total_quantity(level) == 30);
 
-    print_test_result("Remove 3rd order", OrderBookLevel_remove_order(level, &removed_order) && strcmp(removed_order->order_id, "order3") == 0);
+    print_test_result("Remove 3rd order", OrderBookLevel_remove_order(level, removed_order) && strcmp(removed_order->order_id, "order3") == 0);
     print_test_result("Total quantity after 3rd removal", OrderBookLevel_get_total_quantity(level) == 0);
 
     // Test 4: Remove from empty level
@@ -66,13 +66,13 @@ int main() {
 
     passed = 1;
     for (int i = 0; i < 100; i++) {
-        passed &= OrderBookLevel_remove_order(level, &removed_order);
+        passed &= OrderBookLevel_remove_order(level, removed_order);
     }
     print_test_result("Remove 100 orders", passed);
     print_test_result("Level is empty after removing 100 orders", OrderBookLevel_is_empty(level));
 
     // Cleanup
-    OrderBookLevel_destroy(level);
+    OrderBookLevel_destroy(&level);
     printf("All tests completed.\n");
 
     return 0;

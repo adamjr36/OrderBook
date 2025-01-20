@@ -94,7 +94,7 @@ int main() {
     print_test_result("Remaining elements correct", remaining_elements_correct);
 
     // Test 10: Cleanup
-    OrderedMap_destroy(map);
+    OrderedMap_destroy(&map);
     printf("All tests completed.\n");
 
     return 0;

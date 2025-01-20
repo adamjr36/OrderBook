@@ -16,7 +16,10 @@
 // OrderBookSide type definition
 typedef struct OrderBookSide *OrderBookSide;
 
-// Function contracts
+struct OrderBookLevelView {
+    double price;
+    int size;
+};
 
 /**
  * Creates a new OrderBookSide instance.
@@ -29,9 +32,9 @@ OrderBookSide OrderBookSide_create(int is_buy_side);
 /**
  * Destroys an OrderBookSide instance, freeing all associated memory.
  *
- * @param side The OrderBookSide instance to destroy.
+ * @param side A pointer to the OrderBookSide instance to destroy.
  */
-void OrderBookSide_destroy(OrderBookSide side);
+void OrderBookSide_destroy(OrderBookSide *side);
 
 /**
  * Adds an order to the order book side.
@@ -79,5 +82,16 @@ int OrderBookSide_execute_against(OrderBookSide side, Order order, Order **fille
  * @return The best price (highest for buy side, lowest for sell side), or 0 if no levels exist.
  */
 double OrderBookSide_get_best_price(OrderBookSide side);
+
+/**
+ * Gets the k most competitive price levels on this side of the order book. If k is 0 then all levels are returned.
+ * 
+ * @param side The OrderBookSide instance.
+ * @param k The number of levels to return, or 0 for all levels.
+ * @param levels Output pointer to store the array of levels (allocated internally).
+ * @param level_count Output pointer to store the count of levels.
+ * @return 1 if the operation is successful, 0 on failure.
+ */
+int OrderBookSide_get_levels(OrderBookSide side, int k, struct OrderBookLevelView **levels, int *level_count);
 
 #endif // ORDER_BOOK_SIDE_H
