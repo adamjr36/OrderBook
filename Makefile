@@ -1,52 +1,25 @@
-# Makefile for OrderedMap test
+# Makefile for compiling code in src/*.c (excluding src/Test*.c)
+# Produces the executable OrderBookDriver
 
-CC = gcc
-CFLAGS = -Wall -Wextra -g
+CC := gcc
+CFLAGS := -Wall -Wextra -g #-O2 -Iinclude
+EXECUTABLE := OrderBookDriver
 
-# Source files
-SRC = TestOrderedMap.c OrderedMap.c
-OBJ = $(SRC:.c=.o)
+SRC_DIR := src
 
-# Output executable
-# TARGET = TestOrderedMap
-TARGET_MAP = TestOrderedMap
-TARGET_LEVEL = TestOrderBookLevel
-TARGET_HASH = TestHashTable
-TARGET_SIDE = TestOrderBookSide
-TARGET_BOOK = TestOrderBook
-TARGETS = $(TARGET_MAP) $(TARGET_LEVEL) $(TARGET_HASH) $(TARGET_SIDE) $(TARGET_BOOK)
+# Grab all .c files in src/ excluding those starting with Test
+SOURCES := $(filter-out $(SRC_DIR)/Test%.c, $(wildcard $(SRC_DIR)/*.c))
+OBJECTS := $(SOURCES:.c=.o)
 
-# Default rule
-# all: $(TARGET)
-test_map: $(TARGET_MAP)
-test_obl: $(TARGET_LEVEL)
-test_hash: $(TARGET_HASH)
-test_side: $(TARGET_SIDE)
-test_book: $(TARGET_BOOK)
+.PHONY: all clean
 
-# $(TARGET): $(OBJ)
-# 	$(CC) $(CFLAGS) -o $@ $^
+all: $(EXECUTABLE)
 
-$(TARGET_LEVEL): TestOrderBookLevel.o OrderBookLevel.o
-	$(CC) $(CFLAGS) -o $@ $^
-
-$(TARGET_MAP): TestOrderedMap.o OrderedMap.o
-	$(CC) $(CFLAGS) -o $@ $^
-
-$(TARGET_HASH): TestHashTable.o HashTable.o
-	$(CC) $(CFLAGS) -o $@ $^
-
-$(TARGET_SIDE): TestOrderBookSide.o OrderBookSide.o OrderBookLevel.o OrderedMap.o HashTable.o
-	$(CC) $(CFLAGS) -o $@ $^
-
-$(TARGET_BOOK): TestOrderBook.o OrderBook.o OrderBookSide.o OrderBookLevel.o OrderedMap.o HashTable.o
+$(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean rule
 clean:
-	rm -f *.o $(TARGETS)
-
-.PHONY: all clean
+	rm -f $(EXECUTABLE) $(OBJECTS)
