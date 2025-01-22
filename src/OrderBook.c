@@ -10,10 +10,11 @@
  * array of trade IDs for any executed trades, or NULL if no trades occurred.
  *
  * Author: Adam Rubinstein
- * Date: January 19, 2025
+ * Date: January 22, 2025
  */
 
 #include "OrderBook.h"
+#include "HashTable.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +25,7 @@ struct OrderBook {
     OrderBookSide bid_side;        /* The buy side of the order book */
     OrderBookSide ask_side;        /* The sell side of the order book */
 
+    HashTable trade_map;           /* Map of trade_id to Trade */
     Trade *executed_trades;        /* Dynamic array of executed trades */
     int trade_count;               /* Number of executed trades stored */
     int trade_capacity;            /* Current capacity of executed_trades array */
@@ -59,6 +61,7 @@ OrderBook OrderBook_create(void)
         return NULL;
     }
 
+    book->trade_map = HashTable_create(180);
     book->executed_trades = NULL;
     book->trade_count = 0;
     book->trade_capacity = 0;
@@ -87,6 +90,9 @@ void OrderBook_destroy(OrderBook *book) {
         }
         free(b->executed_trades);
     }
+
+    /* Free the trade_map */
+    HashTable_destroy(&(b->trade_map));
 
     /* Free the OrderBook itself */
     free(b);
@@ -350,17 +356,16 @@ Trade OrderBook_get_trade(OrderBook book, const char *trade_id)
         return NULL;
     }
 
-    for (int i = 0; i < book->trade_count; i++) {
-        /* Compare trade_id with each recorded trade's ID */
-        if (strncmp(book->executed_trades[i]->trade_id, trade_id, sizeof(book->executed_trades[i]->trade_id)) == 0) {
-            /* Found a match, create a copy to return */
-            Trade copy = (Trade)malloc(sizeof(*copy));
-            if (!copy) {
-                return NULL; /* Allocation failure */
-            }
-            memcpy(copy, book->executed_trades[i], sizeof(*copy));
-            return copy;
+    /* Use the trade_map to find the trade by ID */
+    Trade original = (Trade)HashTable_get(book->trade_map, trade_id);
+    if (original) {
+        /* Create a copy to return */
+        Trade copy = (Trade)malloc(sizeof(*copy));
+        if (!copy) {
+            return NULL; /* Allocation failure */
         }
+        memcpy(copy, original, sizeof(*copy));
+        return copy;
     }
 
     /* No match found */
@@ -461,6 +466,9 @@ static void add_trade_to_book(OrderBook book, const Trade t)
     /* Store the Trade pointer in the array */
     book->executed_trades[book->trade_count] = t;
     book->trade_count++;
+
+    /* Add Trade to trade_map */
+    HashTable_add(book->trade_map, t->trade_id, t);
 }
 
 /*

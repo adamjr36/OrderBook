@@ -2,6 +2,8 @@
 
 All tests run with leaks --atExit -- [executable] to ensure no memory leaks.
 
+Everything passes, including the driver with the minimal example.csv. Driver and .csv files can't really handle getting a trade by Trade ID because IDs are created dynamically, but this feature is tested in TestOrderBook.c.
+
 ## HashTable, OrderedMap, OrderBookLevel, OrderBookSide
 
 80% of code written with gpt-4o.
@@ -20,4 +22,5 @@ There were a lot of memory leaks and the testing file did a great job of making 
 
 ## Outstanding Issues
 
-Not as much error handling as a real production application. Good enough for what it is with minimal prompting and asking for test files to be "rigorous."
+1. Not as much error handling as a real production application. Good enough for what it is with minimal prompting and asking for test files to be "rigorous."
+2. Only thing really missing is serialization and deserialization for it to be really usable.
